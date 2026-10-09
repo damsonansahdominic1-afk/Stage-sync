@@ -1,41 +1,215 @@
-<!doctype html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>StageSync — Silent Church Stage &amp; Sound Booth Cue</title>
-    <meta name="description" content="Silent stage-to-sound-booth communication PWA for church musicians and audio engineers." />
-    <meta property="og:title" content="StageSync — Silent Church Stage &amp; Sound Booth Cue" />
-    <meta property="og:description" content="Silent stage-to-sound-booth communication PWA for church musicians and audio engineers." />
-    <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="StageSync" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StageSync - Church Stage Signaling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #000; color: #fff; touch-action: manipulation; }
+        .pulse-red { animation: pulseRed 1s infinite; }
+        @keyframes pulseRed { 0%, 100% { background-color: rgba(239, 68, 68, 0.3); border-color: rgb(239, 68, 68); } 50% { background-color: rgba(239, 68, 68, 0.7); border-color: rgb(248, 113, 113); } }
+        .pulse-blue { animation: pulseBlue 1s infinite; }
+        @keyframes pulseBlue { 0%, 100% { background-color: rgba(59, 130, 246, 0.3); border-color: rgb(59, 130, 246); } 50% { background-color: rgba(59, 130, 246, 0.7); border-color: rgb(96, 165, 250); } }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col select-none">
+
+    <!-- SETUP VIEW -->
+    <div id="view-setup" class="flex-1 flex flex-col justify-center items-center p-6 max-w-md mx-auto w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-cyan-400">StageSync</h1>
+            <p class="text-gray-400 text-sm mt-1">Silent Stage-to-Booth Signaling</p>
+        </div>
+
+        <div class="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-5">
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Room Code</label>
+                <input type="text" id="room-code" placeholder="e.g. grace-church-1" value="grace-church-1" class="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 font-mono tracking-wide text-center text-lg">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Select Your Role</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setRole('stage')" id="btn-role-stage" class="py-4 px-3 rounded-xl border border-neutral-700 bg-neutral-950 hover:border-cyan-500 font-bold text-sm transition flex flex-col items-center gap-1">
+                        <span class="text-2xl">🎹</span> Stage
+                    </button>
+                    <button onclick="setRole('booth')" id="btn-role-booth" class="py-4 px-3 rounded-xl border border-neutral-700 bg-neutral-950 hover:border-cyan-500 font-bold text-sm transition flex flex-col items-center gap-1">
+                        <span class="text-2xl">🎛️</span> Booth
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="joinRoom()" class="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold rounded-xl transition shadow-lg shadow-cyan-500/20 text-base">
+                Launch App 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- STAGE VIEW -->
+    <div id="view-stage" class="hidden flex-1 flex flex-col p-4 max-w-md mx-auto w-full justify-between">
+        <div class="flex justify-between items-center py-2 border-b border-neutral-800 text-xs text-gray-400">
+            <span>Role: <strong class="text-cyan-400">Instrumentalist (Stage)</strong></span>
+            <button onclick="resetSetup()" class="underline text-gray-500">Exit</button>
+        </div>
+
+        <div class="my-auto py-6 space-y-4">
+            <!-- HERO CALL BUTTON -->
+            <button onclick="sendSignal('CALL SOUND GUY', 'red')" class="w-full py-10 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-black text-2xl rounded-3xl shadow-2xl shadow-red-600/40 border-4 border-red-400 flex flex-col items-center justify-center gap-2 transition-all">
+                <span class="text-4xl">🚨</span>
+                CALL SOUND GUY
+                <span class="text-xs font-normal text-red-200 tracking-wider uppercase">Put on headset / Listen up</span>
+            </button>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="sendSignal('Vocals Up 🔊', 'blue')" class="p-5 bg-neutral-900 border border-neutral-800 hover:border-blue-500 active:scale-95 rounded-2xl font-bold text-blue-400 text-left flex flex-col justify-between h-28 transition">
+                    <span class="text-2xl">🔊</span> Vocals Up
+                </button>
+                <button onclick="sendSignal('More In-Ear 🎧', 'blue')" class="p-5 bg-neutral-900 border border-neutral-800 hover:border-blue-500 active:scale-95 rounded-2xl font-bold text-cyan-400 text-left flex flex-col justify-between h-28 transition">
+                    <span class="text-2xl">🎧</span> More In-Ear
+                </button>
+                <button onclick="sendSignal('Too Loud ⚠️', 'red')" class="p-5 bg-neutral-900 border border-neutral-800 hover:border-red-500 active:scale-95 rounded-2xl font-bold text-amber-400 text-left flex flex-col justify-between h-28 transition">
+                    <span class="text-2xl">⚠️</span> Too Loud
+                </button>
+                <button onclick="sendSignal('Check Mic 🎤', 'purple')" class="p-5 bg-neutral-900 border border-neutral-800 hover:border-purple-500 active:scale-95 rounded-2xl font-bold text-purple-400 text-left flex flex-col justify-between h-28 transition">
+                    <span class="text-2xl">🎤</span> Check Mic
+                </button>
+            </div>
+        </div>
+
+        <div id="stage-status" class="text-center py-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-gray-400 font-medium">
+            Status: Ready • Room: <span id="lbl-room" class="text-white font-mono"></span>
+        </div>
+    </div>
+
+    <!-- BOOTH VIEW -->
+    <div id="view-booth" class="hidden flex-1 flex flex-col p-6 max-w-2xl mx-auto w-full justify-between">
+        <div class="flex justify-between items-center py-2 border-b border-neutral-800 text-xs text-gray-400">
+            <span>Role: <strong class="text-cyan-400">Sound Booth Monitor</strong></span>
+            <button onclick="resetSetup()" class="underline text-gray-500">Exit</button>
+        </div>
+
+        <div id="booth-alert-box" class="my-auto py-12 px-6 bg-neutral-900 border-2 border-neutral-800 rounded-3xl text-center flex flex-col items-center justify-center transition-all duration-300">
+            <span class="text-6xl mb-4" id="booth-icon">🟢</span>
+            <h2 id="booth-title" class="text-3xl font-black tracking-tight text-gray-200">STANDBY</h2>
+            <p id="booth-subtitle" class="text-gray-400 text-sm mt-2">Waiting for cues from stage...</p>
+            
+            <button id="btn-clear" onclick="clearSignal()" class="hidden mt-8 px-8 py-4 bg-white hover:bg-gray-200 text-black font-extrabold rounded-2xl shadow-xl transition active:scale-95">
+                Acknowledge & Clear ✅
+            </button>
+        </div>
+
+        <div class="text-center py-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-gray-400 font-medium">
+            Booth Listening • Room: <span id="lbl-room-booth" class="text-white font-mono"></span>
+        </div>
+    </div>
+
+    <!-- PERSISTENT BROADCAST CHANNEL ENGINE -->
     <script>
-      // Suppress benign Vite dev HMR websocket notices in iframe preview
-      window.addEventListener('error', function(e) {
-        if (e.message && (e.message.includes('WebSocket') || e.message.includes('closed without opened'))) {
-          e.stopImmediatePropagation();
+        let currentRole = 'stage';
+        let roomCode = 'grace-church-1';
+        let channel = null;
+
+        function setRole(role) {
+            currentRole = role;
+            document.getElementById('btn-role-stage').classList.toggle('border-cyan-400', role === 'stage');
+            document.getElementById('btn-role-stage').classList.toggle('bg-neutral-900', role === 'stage');
+            document.getElementById('btn-role-booth').classList.toggle('border-cyan-400', role === 'booth');
+            document.getElementById('btn-role-booth').classList.toggle('bg-neutral-900', role === 'booth');
         }
-      });
-      window.addEventListener('unhandledrejection', function(e) {
-        var reason = e.reason && (e.reason.message || String(e.reason));
-        if (reason && (reason.includes('WebSocket') || reason.includes('closed without opened'))) {
-          e.preventDefault();
+
+        function joinRoom() {
+            roomCode = document.getElementById('room-code').value.trim() || 'default-room';
+            document.getElementById('lbl-room').innerText = roomCode;
+            document.getElementById('lbl-room-booth').innerText = roomCode;
+
+            // Initialize BroadcastChannel for live instant local/tab sync
+            if (window.BroadcastChannel) {
+                channel = new BroadcastChannel('stagesync_' + roomCode);
+                channel.onmessage = (event) => {
+                    handleIncomingMessage(event.data);
+                };
+            }
+
+            document.getElementById('view-setup').classList.add('hidden');
+            if (currentRole === 'stage') {
+                document.getElementById('view-stage').classList.remove('hidden');
+            } else {
+                document.getElementById('view-booth').classList.remove('hidden');
+            }
         }
-      });
+
+        function sendSignal(text, type) {
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            
+            const payload = { action: 'signal', text: text, type: type, timestamp: Date.now() };
+            if (channel) channel.postMessage(payload);
+            
+            // Also store in localStorage to sync across separate browser windows/devices on same origin if broadcast channel fails
+            localStorage.setItem('stagesync_state_' + roomCode, JSON.stringify(payload));
+
+            document.getElementById('stage-status').innerText = "Signal Sent: " + text + " (Waiting for acknowledge...)";
+            document.getElementById('stage-status').className = "text-center py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-400 font-medium";
+        }
+
+        function clearSignal() {
+            const payload = { action: 'clear', timestamp: Date.now() };
+            if (channel) channel.postMessage(payload);
+            localStorage.setItem('stagesync_state_' + roomCode, JSON.stringify(payload));
+            handleClearUI();
+        }
+
+        function handleIncomingMessage(data) {
+            if (data.action === 'signal') {
+                if (currentRole === 'booth') {
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+                    const box = document.getElementById('booth-alert-box');
+                    const title = document.getElementById('booth-title');
+                    const icon = document.getElementById('booth-icon');
+                    const btn = document.getElementById('btn-clear');
+
+                    title.innerText = data.text;
+                    icon.innerText = data.type === 'red' ? '🚨' : '🎛️';
+                    box.className = "my-auto py-12 px-6 rounded-3xl text-center flex flex-col items-center justify-center transition-all duration-300 border-4 " + (data.type === 'red' ? 'pulse-red' : 'pulse-blue');
+                    btn.classList.remove('hidden');
+                }
+            } else if (data.action === 'clear') {
+                if (currentRole === 'stage') {
+                    const status = document.getElementById('stage-status');
+                    status.innerText = "Acknowledged by Sound Guy! ✅";
+                    status.className = "text-center py-3 bg-green-500/10 border border-green-500/30 rounded-xl text-xs text-green-400 font-medium";
+                    if (navigator.vibrate) navigator.vibrate(50);
+                } else if (currentRole === 'booth') {
+                    handleClearUI();
+                }
+            }
+        }
+
+        function handleClearUI() {
+            const box = document.getElementById('booth-alert-box');
+            const title = document.getElementById('booth-title');
+            const icon = document.getElementById('booth-icon');
+            const btn = document.getElementById('btn-clear');
+
+            title.innerText = "STANDBY";
+            icon.innerText = "🟢";
+            box.className = "my-auto py-12 px-6 bg-neutral-900 border-2 border-neutral-800 rounded-3xl text-center flex flex-col items-center justify-center transition-all duration-300";
+            btn.classList.add('hidden');
+        }
+
+        // Cross-tab fallback via storage events
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'stagesync_state_' + roomCode && e.newValue) {
+                try {
+                    const data = JSON.parse(e.newValue);
+                    handleIncomingMessage(data);
+                } catch(err) {}
+            }
+        });
+
+        // Set default role selection UI on load
+        setRole('stage');
     </script>
-  </head>
-
-  <body class="bg-black text-neutral-100 select-none overflow-x-hidden min-h-screen">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>
-
-
