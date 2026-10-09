@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background-color: #000000;
+  color: #f5f5f5;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #000000;
+  position: relative;
+}
+
+/* Safe area insets for mobile devices with home indicator bars & notches */
+.safe-pb {
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+}
+
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* GPU-accelerated high-visibility visual strobe animations (no expensive blur shadows) */
+@keyframes urgent-beacon {
+  0%, 100% {
+    opacity: 0.12;
+    background-color: rgba(220, 38, 38, 0.15);
+  }
+  50% {
+    opacity: 0.85;
+    background-color: rgba(239, 68, 68, 0.45);
+  }
+}
+
+@keyframes call-border-strobe {
+  0%, 100% {
+    border-color: #f59e0b;
+    box-shadow: inset 0 0 20px #f59e0b;
+  }
+  50% {
+    border-color: #ef4444;
+    box-shadow: inset 0 0 45px #ef4444;
+  }
+}
+
+@keyframes cue-border-strobe {
+  0%, 100% {
+    border-color: #06b6d4;
+    box-shadow: inset 0 0 15px #06b6d4;
+  }
+  50% {
+    border-color: #3b82f6;
+    box-shadow: inset 0 0 35px #3b82f6;
+  }
+}
+
+@keyframes stage-ack-flash {
+  0%, 100% {
+    background-color: rgba(16, 185, 129, 0.95);
+  }
+  50% {
+    background-color: rgba(5, 150, 105, 0.98);
+  }
+}
+
+.animate-urgent-beacon {
+  animation: urgent-beacon 0.8s ease-in-out infinite;
+}
+
+.animate-call-border {
+  animation: call-border-strobe 0.7s ease-in-out infinite;
+}
+
+.animate-cue-border {
+  animation: cue-border-strobe 1s ease-in-out infinite;
+}
+
+.animate-stage-ack {
+  animation: stage-ack-flash 0.9s ease-in-out infinite;
+}

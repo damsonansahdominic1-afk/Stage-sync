@@ -1,0 +1,8 @@
+{
+  "name": "StageSync",
+  "description": "Silent stage-to-sound-booth communication PWA for church musicians and audio engineers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
